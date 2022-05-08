@@ -9,8 +9,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1468375757443140730}
-  - component: {fileID: 2684698706639281940}
   - component: {fileID: 6581335561859427947}
+  - component: {fileID: 2684698706639281940}
+  - component: {fileID: 3625670408801811403}
   m_Layer: 7
   m_Name: Minion
   m_TagString: Untagged
@@ -34,22 +35,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2684698706639281940
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4178897287268534935}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a9f725a70e994224985931538c68343e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  team: 0
-  healthBar: {fileID: 3927542935258865767}
-  isMinion: 1
-  maxHealth: 100
 --- !u!195 &6581335561859427947
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -72,6 +57,36 @@ NavMeshAgent:
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
+--- !u!114 &2684698706639281940
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4178897287268534935}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a9f725a70e994224985931538c68343e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  team: 0
+  healthBar: {fileID: 3927542935258865767}
+  isMinion: 1
+  maxHealth: 100
+--- !u!136 &3625670408801811403
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4178897287268534935}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  m_Radius: 0.5
+  m_Height: 1
+  m_Direction: 1
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &4326313940230859765
 GameObject:
   m_ObjectHideFlags: 0
@@ -83,8 +98,7 @@ GameObject:
   - component: {fileID: 5605827170732590679}
   - component: {fileID: 3631032443036322110}
   - component: {fileID: 5003691359561602368}
-  - component: {fileID: 8542254456752949373}
-  m_Layer: 7
+  m_Layer: 0
   m_Name: Graphics
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -157,20 +171,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!136 &8542254456752949373
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4326313940230859765}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  m_Radius: 0.5
-  m_Height: 2
-  m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1001 &6364923744825004635
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -178,6 +178,14 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 5605827170732590679}
     m_Modifications:
+    - target: {fileID: 762043036039846286, guid: a917cdd1dc97ec2469a70db44aeb64c4, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1457979149207128111, guid: a917cdd1dc97ec2469a70db44aeb64c4, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2800007272007147527, guid: a917cdd1dc97ec2469a70db44aeb64c4, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -230,6 +238,18 @@ PrefabInstance:
       propertyPath: m_Name
       value: HealthBar
       objectReference: {fileID: 0}
+    - target: {fileID: 4538940783377112264, guid: a917cdd1dc97ec2469a70db44aeb64c4, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5197328048760433671, guid: a917cdd1dc97ec2469a70db44aeb64c4, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5612435680186576344, guid: a917cdd1dc97ec2469a70db44aeb64c4, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6267706171553937075, guid: a917cdd1dc97ec2469a70db44aeb64c4, type: 3}
       propertyPath: m_RootOrder
       value: 0
@@ -272,6 +292,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6267706171553937075, guid: a917cdd1dc97ec2469a70db44aeb64c4, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8477240809709496442, guid: a917cdd1dc97ec2469a70db44aeb64c4, type: 3}
+      propertyPath: m_Layer
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []

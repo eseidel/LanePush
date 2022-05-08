@@ -3,24 +3,23 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
+
+[RequireComponent(typeof(MOB)), RequireComponent(typeof(NavMeshAgent))]
 public class PlayerController : MonoBehaviour
 {
     new public Camera camera;
+    MOB me;
     public NavMeshAgent navMeshAgent;
 
     private void Start()
     {
-        navMeshAgent.updateRotation = false;
-    }
-
-    void WalkTo(Vector3 point)
-    {
-        navMeshAgent.SetDestination(point);
+        me = GetComponent<MOB>();
+        navMeshAgent = GetComponent<NavMeshAgent>();
     }
 
     void BlinkTo(Vector3 point)
     {
-        navMeshAgent.SetDestination(point);
+        me.ClearNavigationPath();
         transform.position = point;
     }
 
@@ -32,7 +31,7 @@ public class PlayerController : MonoBehaviour
             RaycastHit hit;
             if (Physics.Raycast(ray, out hit))
             {
-                WalkTo(hit.point);
+                me.WalkTo(hit.point);
             }
         }
 

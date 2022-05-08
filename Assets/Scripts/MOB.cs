@@ -19,11 +19,13 @@ public enum Team
 enum Status
 {
     Stopped,
+    ExplicitWalk,
     Wandering,
     Chasing,
     Attacking,
 }
 
+[RequireComponent(typeof(NavMeshAgent))]
 public class MOB : MonoBehaviour
 {
     NavMeshAgent navMeshAgent;
@@ -41,7 +43,7 @@ public class MOB : MonoBehaviour
     float targetUpdateInterval = 0.25f;
     float timeUntilTargetUpdate = 0;
 
-    float attackRange = 1.0f;
+    float attackRange = 1.5f;
     float attackInterval = 1.0f;
     float aggroRadius = 4.0f;
 
@@ -58,9 +60,11 @@ public class MOB : MonoBehaviour
         var aggroCircle = new GameObject { name = "AggroRadius" };
         aggroCircle.DrawCircle(aggroRadius, .02f);
         aggroCircle.transform.parent = transform;
+        aggroCircle.transform.localPosition = Vector3.zero;
         var attackCircle = new GameObject { name = "AttackRange" };
         attackCircle.DrawCircle(attackRange, .02f);
         attackCircle.transform.parent = transform;
+        attackCircle.transform.localPosition = Vector3.zero;
     }
 
     // Minion States
@@ -74,15 +78,19 @@ public class MOB : MonoBehaviour
         if (currentTarget == null)
         {
             // Hack to get a nearby mob.
-            Collider[] hitColliders = Physics.OverlapSphere(transform.position, aggroRadius);
+            Collider[] hitColliders = Physics.OverlapSphere(transform.position, aggroRadius, mobsMask);
             foreach (var hitCollider in hitColliders)
             {
                 var mob = hitCollider.gameObject.GetComponent<MOB>();
-                // FIXME: This is wrong.
-                if (mob == null) continue; 
+                if (mob == null)
+                {
+                    Debug.LogFormat("{0} in MOB layer does not have parent with MOB component", hitCollider);
+                    continue;
+                }
                 if (mob.team != team)
                 {
-                    Chase(mob);
+                    currentTarget = mob;
+                    break;
                 }
             }
         }
@@ -101,11 +109,11 @@ public class MOB : MonoBehaviour
         if (currentTarget != null)
         {
             // If target is untargable, drop.
-            if (currentTarget.IsTargetable())
+            if (!currentTarget.IsTargetable())
             {
                 ClearTarget();
             }
-            else if (DistanceTo(currentTarget) > aggroRadius)
+            else if (isMinion && DistanceTo(currentTarget) > aggroRadius)
             {
                 // If target is out of range, drop.
                 ClearTarget();
@@ -130,6 +138,7 @@ public class MOB : MonoBehaviour
 
     public void ClearTarget()
     {
+        Debug.Log("ClearTarget");
         currentTarget = null;
     }
 
@@ -143,23 +152,35 @@ public class MOB : MonoBehaviour
         return (mob.transform.position - transform.position).magnitude;
     }
 
-    void Chase(MOB target)
+    void Chase(MOB mob)
     {
-        currentTarget = target;
+        Debug.Log("Chasing");
+        currentTarget = mob;
         status = Status.Chasing;
-        navMeshAgent.SetDestination(target.transform.position);
+        navMeshAgent.SetDestination(currentTarget.transform.position);
     }
 
-    void ClearNavigationPath()
+    void CancelAutoAttack()
     {
-        navMeshAgent.SetDestination(transform.position);
+
+    }
+
+    public void WalkTo(Vector3 point)
+    {
+        CancelAutoAttack();
+        status = Status.ExplicitWalk;
+        navMeshAgent.SetDestination(point);
+    }
+
+    public void ClearNavigationPath()
+    {
+        navMeshAgent.ResetPath();
     }
 
     void StartAutoAttack()
     {
         ClearNavigationPath(); // Stop chasing.
         status = Status.Attacking;
-        Debug.Log("StartAttack");
         // start attack animation
         // launch missile?
     }
@@ -174,6 +195,21 @@ public class MOB : MonoBehaviour
         // Add attacker to aggro list.
     }
 
+    bool ReachedDestination()
+    {
+        if (!navMeshAgent.pathPending)
+        {
+            if (navMeshAgent.remainingDistance <= navMeshAgent.stoppingDistance)
+            {
+                if (!navMeshAgent.hasPath || navMeshAgent.velocity.sqrMagnitude == 0f)
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     // Update is called once per frame
     void Update()
     {
@@ -186,7 +222,14 @@ public class MOB : MonoBehaviour
             // If in the middle of an action, don't do anything.
         }
 
-        if (currentTarget != null)
+        if (status == Status.ExplicitWalk)
+        {
+            if (ReachedDestination())
+            {
+                status = Status.Stopped;
+            }
+        }
+        else if (currentTarget != null)
         {
             if (DistanceTo(currentTarget) < attackRange)
             {
@@ -194,10 +237,13 @@ public class MOB : MonoBehaviour
             }
             else
             {
-                status = Status.Chasing;
+                if (isMinion)
+                {
+                    Chase(currentTarget);
+                }
             }
         }
-        else
+        else if (isMinion)
         {
             // Path towards the nearest waypoint.
         }
