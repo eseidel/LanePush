@@ -43,9 +43,9 @@ public class MOB : MonoBehaviour
     float targetUpdateInterval = 0.25f;
     float timeUntilTargetUpdate = 0;
 
-    float attackRange = 1.5f;
+    float attackRange = 1.5f; // Melee
     float attackInterval = 1.0f;
-    float aggroRadius = 4.0f;
+    float acquisitionRange = 7.0f;
 
     bool isAlive = true;
     LayerMask mobsMask;
@@ -57,12 +57,14 @@ public class MOB : MonoBehaviour
         mobsMask = LayerMask.GetMask("MOB");
         AdjustHealth(maxHealth);
 
-        var aggroCircle = new GameObject { name = "AggroRadius" };
-        aggroCircle.DrawCircle(aggroRadius, .02f);
-        aggroCircle.transform.parent = transform;
-        aggroCircle.transform.localPosition = Vector3.zero;
-        var attackCircle = new GameObject { name = "AttackRange" };
-        attackCircle.DrawCircle(attackRange, .02f);
+        AddCircle("AcquisitionRange", acquisitionRange);
+        AddCircle("AttackRange", attackRange);
+    }
+
+    void AddCircle(string name, float radius)
+    {
+        var attackCircle = new GameObject { name = name };
+        attackCircle.DrawCircle(radius, 0.02f);
         attackCircle.transform.parent = transform;
         attackCircle.transform.localPosition = Vector3.zero;
     }
@@ -78,7 +80,7 @@ public class MOB : MonoBehaviour
         if (currentTarget == null)
         {
             // Hack to get a nearby mob.
-            Collider[] hitColliders = Physics.OverlapSphere(transform.position, aggroRadius, mobsMask);
+            Collider[] hitColliders = Physics.OverlapSphere(transform.position, acquisitionRange, mobsMask);
             foreach (var hitCollider in hitColliders)
             {
                 var mob = hitCollider.gameObject.GetComponent<MOB>();
@@ -113,7 +115,7 @@ public class MOB : MonoBehaviour
             {
                 ClearTarget();
             }
-            else if (isMinion && DistanceTo(currentTarget) > aggroRadius)
+            else if (isMinion && DistanceTo(currentTarget) > acquisitionRange)
             {
                 // If target is out of range, drop.
                 ClearTarget();
@@ -138,7 +140,6 @@ public class MOB : MonoBehaviour
 
     public void ClearTarget()
     {
-        Debug.Log("ClearTarget");
         currentTarget = null;
     }
 
@@ -154,7 +155,6 @@ public class MOB : MonoBehaviour
 
     void Chase(MOB mob)
     {
-        Debug.Log("Chasing");
         currentTarget = mob;
         status = Status.Chasing;
         navMeshAgent.SetDestination(currentTarget.transform.position);
