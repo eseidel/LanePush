@@ -13,6 +13,7 @@ MVP
 * Experiance / Levels
 * Death animations
 * Player Death
+* Target highlight on mouse hover.
 
  
 # Notes

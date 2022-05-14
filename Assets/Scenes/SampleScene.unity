@@ -252,67 +252,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 251981933}
   m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
---- !u!1001 &494021895
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 1468375757443140730, guid: 9c9bedd6467fb43478e5883e49dc2968, type: 3}
-      propertyPath: m_RootOrder
-      value: 6
-      objectReference: {fileID: 0}
-    - target: {fileID: 1468375757443140730, guid: 9c9bedd6467fb43478e5883e49dc2968, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1468375757443140730, guid: 9c9bedd6467fb43478e5883e49dc2968, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1468375757443140730, guid: 9c9bedd6467fb43478e5883e49dc2968, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 1.954
-      objectReference: {fileID: 0}
-    - target: {fileID: 1468375757443140730, guid: 9c9bedd6467fb43478e5883e49dc2968, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1468375757443140730, guid: 9c9bedd6467fb43478e5883e49dc2968, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1468375757443140730, guid: 9c9bedd6467fb43478e5883e49dc2968, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1468375757443140730, guid: 9c9bedd6467fb43478e5883e49dc2968, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1468375757443140730, guid: 9c9bedd6467fb43478e5883e49dc2968, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1468375757443140730, guid: 9c9bedd6467fb43478e5883e49dc2968, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1468375757443140730, guid: 9c9bedd6467fb43478e5883e49dc2968, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4178897287268534935, guid: 9c9bedd6467fb43478e5883e49dc2968, type: 3}
-      propertyPath: m_Name
-      value: Minion
-      objectReference: {fileID: 0}
-    - target: {fileID: 9119612959310574172, guid: 9c9bedd6467fb43478e5883e49dc2968, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 9c9bedd6467fb43478e5883e49dc2968, type: 3}
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
@@ -991,7 +930,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 8
+  m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1817323821
 GameObject:
@@ -1023,7 +962,7 @@ Transform:
   m_Children:
   - {fileID: 251981934}
   m_Father: {fileID: 0}
-  m_RootOrder: 7
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1933304895
 GameObject:
@@ -1110,9 +1049,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   team: 1
-  healthBar: {fileID: 0}
+  healthBar: {fileID: 7986482005125460540, guid: a917cdd1dc97ec2469a70db44aeb64c4, type: 3}
+  stats: {fileID: 11400000, guid: 541bc0e102cb02d4394f7fb89f97c2d9, type: 2}
   isMinion: 0
-  maxHealth: 100
+  missleSpawn: {fileID: 1492597756}
+  misslePrefab: {fileID: 4164277237464812670, guid: ae00a66c9bdbf2846b8397858f3d7059, type: 3}
 --- !u!136 &1933304903
 CapsuleCollider:
   m_ObjectHideFlags: 0

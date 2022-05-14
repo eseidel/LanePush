@@ -9,6 +9,7 @@ class AggroList
 {
 
 }
+
 public enum Team
 {
     blue,
@@ -18,9 +19,8 @@ public enum Team
 
 enum Status
 {
-    Stopped,
+    Idle,
     ExplicitWalk,
-    Wandering,
     Chasing,
     Attacking,
 }
@@ -31,34 +31,52 @@ public class MOB : MonoBehaviour
     NavMeshAgent navMeshAgent;
     public Team team;
     public HealthBar? healthBar;
+    public MOBStats stats;
 
     MOB? currentTarget;
     public bool isMinion = false;
-    Status status = Status.Stopped;
+    Status status = Status.Idle;
 
     float currentHealth;
-    public float maxHealth;
 
     // All mobs should update at the same time?
     float targetUpdateInterval = 0.25f;
     float timeUntilTargetUpdate = 0;
 
-    float attackRange = 1.5f; // Melee
-    float attackInterval = 1.0f;
     float acquisitionRange = 7.0f;
+    float timeUntilNextAttack = 0;
 
     bool isAlive = true;
     LayerMask mobsMask;
+
+    public Transform missileSpawn;
+    public GameObject missilePrefab;
+
+
+    float MaxHealth()
+    {
+        return stats.baseHealth;
+    }
+
+    float AttackDamage()
+    {
+        return stats.baseAttackDamage;
+    }
+
+    float AttackDelay()
+    {
+        return stats.attackSpeed / 1f;
+    }
 
     // Start is called before the first frame update
     void Start()
     {
         navMeshAgent = GetComponent<NavMeshAgent>();
         mobsMask = LayerMask.GetMask("MOB");
-        AdjustHealth(maxHealth);
+        AdjustHealth(MaxHealth());
 
         AddCircle("AcquisitionRange", acquisitionRange);
-        AddCircle("AttackRange", attackRange);
+        AddCircle("AttackRange", stats.attackRange);
     }
 
     void AddCircle(string name, float radius)
@@ -127,14 +145,14 @@ public class MOB : MonoBehaviour
     {
         if (healthBar != null)
         {
-            healthBar.SetMaxHealth(maxHealth);
+            healthBar.SetMaxHealth(MaxHealth());
             healthBar.SetCurrentHealth(currentHealth);
         }
     }
 
-    void AdjustHealth(float health)
+    public void AdjustHealth(float health)
     {
-        currentHealth = Mathf.Max(Mathf.Min(currentHealth + health, maxHealth), 0);
+        currentHealth = Mathf.Max(Mathf.Min(currentHealth + health, MaxHealth()), 0);
         UpdateHealthBar();
     }
 
@@ -181,8 +199,17 @@ public class MOB : MonoBehaviour
     {
         ClearNavigationPath(); // Stop chasing.
         status = Status.Attacking;
+        timeUntilNextAttack = AttackDelay();
         // start attack animation
         // launch missile?
+    }
+
+    void LaunchMissle()
+    {
+        var obj = Object.Instantiate(missilePrefab, missileSpawn.position, Quaternion.identity);
+        var missle = obj.GetComponent<Missile>();
+        missle.target = currentTarget!.transform;
+        missle.damage = AttackDamage();
     }
 
     void CallForHelp()
@@ -222,30 +249,48 @@ public class MOB : MonoBehaviour
             // If in the middle of an action, don't do anything.
         }
 
-        if (status == Status.ExplicitWalk)
+        if (currentTarget != null)
         {
-            if (ReachedDestination())
+            if (status == Status.ExplicitWalk)
             {
-                status = Status.Stopped;
-            }
-        }
-        else if (currentTarget != null)
-        {
-            if (DistanceTo(currentTarget) < attackRange)
-            {
-                StartAutoAttack();
-            }
-            else
-            {
-                if (isMinion)
+                if (ReachedDestination())
                 {
-                    Chase(currentTarget);
+                    status = Status.Idle;
                 }
             }
-        }
-        else if (isMinion)
-        {
-            // Path towards the nearest waypoint.
+            else if (status == Status.Attacking)
+            {
+                if (DistanceTo(currentTarget) < stats.attackRange)
+                {
+                    timeUntilNextAttack -= Time.deltaTime;
+                    if (timeUntilNextAttack <= 0)
+                    {
+                        LaunchMissle();
+                        StartAutoAttack();
+                    }
+                }
+                else
+                {
+                    status = Status.Idle;
+                }
+            } else if (status == Status.Idle || status == Status.Chasing)
+            {
+                if (DistanceTo(currentTarget) < stats.attackRange)
+                {
+                    StartAutoAttack();
+                }
+                else
+                {
+                    if (status == Status.Chasing || isMinion)
+                    {
+                        Chase(currentTarget);
+                    }
+                }
+            }
+            else if (isMinion)
+            {
+                // Path towards the nearest waypoint.
+            }
         }
     }
 }

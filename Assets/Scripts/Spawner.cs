@@ -5,13 +5,23 @@ using UnityEngine;
 public class Spawner : MonoBehaviour
 {
     public int secondsBetweenSpawns;
-    public GameObject minionPrefab;
-    public GameObject spawnPoint;
+    public GameObject meleePrefab;
+    public GameObject rangedPrefab;
+    public Transform spawnPoint;
 
     float timeUntilNextSpawn = 0;
 
     public Team team;
 
+    bool nextIsMelee = false;
+
+    void Spawn(GameObject prefab)
+    {
+        var obj = Object.Instantiate(prefab, spawnPoint.transform.position, Quaternion.identity);
+        var mob = obj.GetComponent<MOB>();
+        mob.isMinion = true;
+        mob.team = team;
+    }
 
     // Update is called once per frame
     void Update()
@@ -20,10 +30,14 @@ public class Spawner : MonoBehaviour
         if (timeUntilNextSpawn < 0)
         {
             timeUntilNextSpawn = secondsBetweenSpawns;
-            var obj = Object.Instantiate(minionPrefab, spawnPoint.transform.position, Quaternion.identity);
-            var mob = obj.GetComponent<MOB>();
-            mob.isMinion = true;
-            mob.team = team;
+            if (nextIsMelee)
+            {
+                Spawn(meleePrefab);
+            } else
+            {
+                Spawn(rangedPrefab);
+            }
+            nextIsMelee = !nextIsMelee;
         }
     }
 }
