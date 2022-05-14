@@ -1,6 +1,8 @@
 # LanePush
 
 MVP
+* Make it possible for the player to attack.
+* make it possible for the player to respawn.
 * Basic attack Animations
 * Minions re-target / drop aggro
 * Despawn missles after a certain time?

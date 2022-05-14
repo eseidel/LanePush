@@ -14,6 +14,12 @@ public class Missile : MonoBehaviour
 
     void FixedUpdate()
     {
+        if (target == null)
+        {
+            // Should also check MOB.isDead?
+            Destroy(gameObject);
+            return;
+        }
         Vector3 direction = target.position - rigidBody.position;
         direction.Normalize();
         var rotateAmount = Vector3.Cross(direction, transform.up);
@@ -23,9 +29,13 @@ public class Missile : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        Debug.Log(other);
         var mob = other.GetComponent<MOB>();
-        mob.AdjustHealth(-damage);
-        Destroy(gameObject);
+        if (mob != null)
+        {
+            mob.AdjustHealth(-damage);
+            Destroy(gameObject);
+        }
+        // Otherwise we ran into another missle or the ground, etc.
+        // FIXME: Is there a way to only collide with certain layers?
     }
 }

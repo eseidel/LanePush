@@ -1,5 +1,3 @@
-#nullable enable
-
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -30,10 +28,10 @@ public class MOB : MonoBehaviour
 {
     NavMeshAgent navMeshAgent;
     public Team team;
-    public HealthBar? healthBar;
+    public HealthBar healthBar;
     public MOBStats stats;
 
-    MOB? currentTarget;
+    MOB currentTarget;
     Status status = Status.Idle;
 
     float currentHealth;
@@ -91,7 +89,11 @@ public class MOB : MonoBehaviour
 
         navMeshAgent.speed = MoveSpeed();
 
-        currentWaypoint = waypoints.GetFirstWaypoint(team == Team.red);
+        // 
+        if (waypoints != null)
+        {
+            currentWaypoint = waypoints.GetFirstWaypoint(team == Team.red);
+        }
     }
 
     void AddCircle(string name, float radius)
@@ -326,14 +328,17 @@ public class MOB : MonoBehaviour
         {
             if (status == Status.Idle)
             {
-                // Move towards the next waypoint.
-                if (Vector3.Distance(transform.position, currentWaypoint.position) < waypointDistanceThreshold)
+                if (waypoints != null)
                 {
-                    currentWaypoint = waypoints.GetNextWaypoint(currentWaypoint, team == Team.red);
-                }
-                if (currentWaypoint)
-                {
-                    navMeshAgent.SetDestination(currentWaypoint.position);
+                    // Move towards the next waypoint.
+                    if (Vector3.Distance(transform.position, currentWaypoint.position) < waypointDistanceThreshold)
+                    {
+                        currentWaypoint = waypoints.GetNextWaypoint(currentWaypoint, team == Team.red);
+                    }
+                    if (currentWaypoint)
+                    {
+                        navMeshAgent.SetDestination(currentWaypoint.position);
+                    }
                 }
             }
         }
