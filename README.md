@@ -1,9 +1,9 @@
 # LanePush
 
 MVP
-* Melee / Ranged minions
-* Auto attacks
 * Basic attack Animations
+* Minions drop aggro
+* Differentiate between team colors.
 
 ## TODO
 * Player spawn locations

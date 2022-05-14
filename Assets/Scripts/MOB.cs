@@ -34,12 +34,11 @@ public class MOB : MonoBehaviour
     public MOBStats stats;
 
     MOB? currentTarget;
-    public bool isMinion = false;
     Status status = Status.Idle;
 
     float currentHealth;
 
-    // All mobs should update at the same time?
+    // Should all mobs should update at the same time?
     float targetUpdateInterval = 0.25f;
     float timeUntilTargetUpdate = 0;
 
@@ -51,6 +50,13 @@ public class MOB : MonoBehaviour
 
     public Transform missileSpawn;
     public GameObject missilePrefab;
+
+
+    // FIXME: This belongs on a Minion AI?
+    public bool isMinion = false;
+    public Waypoints waypoints;
+    Transform currentWaypoint;
+    float waypointDistanceThreshold = 1f;
 
 
     float MaxHealth()
@@ -68,6 +74,11 @@ public class MOB : MonoBehaviour
         return stats.attackSpeed / 1f;
     }
 
+    float MoveSpeed()
+    {
+        return stats.baseMoveSpeed;
+    }
+
     // Start is called before the first frame update
     void Start()
     {
@@ -75,8 +86,12 @@ public class MOB : MonoBehaviour
         mobsMask = LayerMask.GetMask("MOB");
         AdjustHealth(MaxHealth());
 
-        AddCircle("AcquisitionRange", acquisitionRange);
-        AddCircle("AttackRange", stats.attackRange);
+        // AddCircle("AcquisitionRange", acquisitionRange);
+        // AddCircle("AttackRange", stats.attackRange);
+
+        navMeshAgent.speed = MoveSpeed();
+
+        currentWaypoint = waypoints.GetFirstWaypoint(team == Team.red);
     }
 
     void AddCircle(string name, float radius)
@@ -154,6 +169,11 @@ public class MOB : MonoBehaviour
     {
         currentHealth = Mathf.Max(Mathf.Min(currentHealth + health, MaxHealth()), 0);
         UpdateHealthBar();
+
+        if (currentHealth <= 0)
+        {
+            Destroy(gameObject);
+        }
     }
 
     public void ClearTarget()
@@ -273,7 +293,8 @@ public class MOB : MonoBehaviour
                 {
                     status = Status.Idle;
                 }
-            } else if (status == Status.Idle || status == Status.Chasing)
+            }
+            else if (status == Status.Chasing)
             {
                 if (DistanceTo(currentTarget) < stats.attackRange)
                 {
@@ -281,15 +302,39 @@ public class MOB : MonoBehaviour
                 }
                 else
                 {
-                    if (status == Status.Chasing || isMinion)
+                    // Update our target location.
+                Chase(currentTarget);
+                }
+            }
+            else if (status == Status.Idle)
+            {
+                if (DistanceTo(currentTarget) < stats.attackRange)
+                {
+                    StartAutoAttack();
+                }
+                else
+                {
+                    if (isMinion)
                     {
+                        // If we have a target start chasing it.
                         Chase(currentTarget);
                     }
                 }
+
             }
-            else if (isMinion)
+        } else
+        {
+            if (status == Status.Idle)
             {
-                // Path towards the nearest waypoint.
+                // Move towards the next waypoint.
+                if (Vector3.Distance(transform.position, currentWaypoint.position) < waypointDistanceThreshold)
+                {
+                    currentWaypoint = waypoints.GetNextWaypoint(currentWaypoint, team == Team.red);
+                }
+                if (currentWaypoint)
+                {
+                    navMeshAgent.SetDestination(currentWaypoint.position);
+                }
             }
         }
     }

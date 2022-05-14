@@ -8,6 +8,7 @@ public class Spawner : MonoBehaviour
     public GameObject meleePrefab;
     public GameObject rangedPrefab;
     public Transform spawnPoint;
+    public Waypoints waypoints;
 
     float timeUntilNextSpawn = 0;
 
@@ -21,6 +22,7 @@ public class Spawner : MonoBehaviour
         var mob = obj.GetComponent<MOB>();
         mob.isMinion = true;
         mob.team = team;
+        mob.waypoints = waypoints;
     }
 
     // Update is called once per frame

@@ -5,19 +5,14 @@ using UnityEngine;
 
 
 
-public class MinionAI 
+[RequireComponent(typeof(MOB))]
+public class MinionAI : MonoBehaviour
 {
-
-
     MOB me;
+    GameObject[] waypoints;
 
-
-
-
-
-    // Update is called once per frame
-    void Update(MOB me)
+    void Start()
     {
-
+        me = GetComponent<MOB>();
     }
 }
