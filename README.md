@@ -2,12 +2,11 @@
 
 MVP
 * Basic attack Animations
-* Minions drop aggro
-* Differentiate between team colors.
+* Minions re-target / drop aggro
+* Despawn missles after a certain time?
 
 ## TODO
 * Player spawn locations
-* Towers
 * Walls
 * Scaling animations with attack speed.
 * Experiance / Levels

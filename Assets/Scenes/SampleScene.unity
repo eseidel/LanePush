@@ -1102,9 +1102,10 @@ MonoBehaviour:
   team: 0
   healthBar: {fileID: 7986482005125460540, guid: a917cdd1dc97ec2469a70db44aeb64c4, type: 3}
   stats: {fileID: 11400000, guid: 541bc0e102cb02d4394f7fb89f97c2d9, type: 2}
-  isMinion: 0
   missileSpawn: {fileID: 0}
   missilePrefab: {fileID: 0}
+  isMinion: 0
+  waypoints: {fileID: 0}
 --- !u!136 &1933304903
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -1130,6 +1131,10 @@ PrefabInstance:
       propertyPath: team
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 210945418814157412, guid: 8bc2434cd782e9246bfb7f07dbbed773, type: 3}
+      propertyPath: waypoints
+      value: 
+      objectReference: {fileID: 722923796}
     - target: {fileID: 210945418814157413, guid: 8bc2434cd782e9246bfb7f07dbbed773, type: 3}
       propertyPath: m_Name
       value: Blue Spawner
@@ -1224,6 +1229,18 @@ PrefabInstance:
       propertyPath: team
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 210945418814157412, guid: 8bc2434cd782e9246bfb7f07dbbed773, type: 3}
+      propertyPath: waypoints
+      value: 
+      objectReference: {fileID: 722923796}
+    - target: {fileID: 210945418814157412, guid: 8bc2434cd782e9246bfb7f07dbbed773, type: 3}
+      propertyPath: meleePrefab
+      value: 
+      objectReference: {fileID: 4178897287268534935, guid: 59da0f005059b4c438b877a8d0141755, type: 3}
+    - target: {fileID: 210945418814157412, guid: 8bc2434cd782e9246bfb7f07dbbed773, type: 3}
+      propertyPath: rangedPrefab
+      value: 
+      objectReference: {fileID: 4178897287268534935, guid: 2fc59ed5784f51c47a67ac5df133cd2e, type: 3}
     - target: {fileID: 210945418814157413, guid: 8bc2434cd782e9246bfb7f07dbbed773, type: 3}
       propertyPath: m_Name
       value: Red Spawner
