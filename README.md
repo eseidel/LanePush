@@ -7,7 +7,6 @@
 * Minion call for help?
 
 ## Bugs
-* Mellee minions aren't doing damage?
 * Structures can be pushed around.
 * Player can be pushed around.
 * Minions shove through each other instead of pathing around.
@@ -16,7 +15,8 @@
 
 ## TODO
 * Select things with mouse-1?
-* Show minion intent above their heads.
+* Camera stacking to show UI above other objects?
+https://docs.unity3d.com/Packages/com.unity.render-pipelines.universal@14.0/manual/camera-stacking.html
 * Player spawn locations
 * Walls
 * Scaling animations with attack speed.

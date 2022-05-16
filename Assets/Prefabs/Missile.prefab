@@ -111,11 +111,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 29ecc5133c8d3214dac7ebc2d1771b8f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  source: {fileID: 0}
   target: {fileID: 0}
   rigidBody: {fileID: 3864808479350351851}
-  angleChangingSpeed: 100
   movementSpeed: 10
-  damage: 10
 --- !u!54 &3864808479350351851
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -126,7 +125,7 @@ Rigidbody:
   serializedVersion: 2
   m_Mass: 1
   m_Drag: 0
-  m_AngularDrag: 0.05
+  m_AngularDrag: 0
   m_UseGravity: 0
   m_IsKinematic: 0
   m_Interpolate: 0

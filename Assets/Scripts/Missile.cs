@@ -8,7 +8,7 @@ public class Missile : MonoBehaviour
     public MOB source;
     public Transform target;
     public Rigidbody rigidBody;
-    float angleChangingSpeed = 360;
+    float angleChangingSpeed = 100;
     public float movementSpeed;
     float damage = 0;
 
@@ -21,6 +21,11 @@ public class Missile : MonoBehaviour
         missile.source = source;
         obj.transform.LookAt(target);
         return missile;
+    }
+
+    private void Start()
+    {
+        GetComponent<Rigidbody>().maxAngularVelocity = Mathf.Infinity;
     }
 
     void FixedUpdate()
