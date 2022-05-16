@@ -154,9 +154,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   team: 2
   healthBar: {fileID: 0}
+  statusBar: {fileID: 0}
   stats: {fileID: 11400000, guid: 39e265b31dcd15e49bf310f227939372, type: 2}
   missileSpawn: {fileID: 0}
   missilePrefab: {fileID: 0}
+  popupTextPrefab: {fileID: 3669520424701416890, guid: 27ec797d704514548987abb1c1ae6626, type: 3}
   mobType: 2
   waypoints: {fileID: 0}
 --- !u!136 &1458689172489173195

@@ -65,6 +65,7 @@ public class MOB : MonoBehaviour
     public Transform missileSpawn;
     public GameObject missilePrefab;
 
+    public GameObject popupTextPrefab;
 
     // FIXME: This belongs on a Minion AI?
     public MOBType mobType;
@@ -220,11 +221,16 @@ public class MOB : MonoBehaviour
         }
     }
 
-    public void AdjustHealth(float health, MOB source)
+    public void AdjustHealth(float adjustment, MOB source)
     {
         // Debug.Log("Adjust Health " + health + " for " + this + " from " + source);
-        currentHealth = Mathf.Max(Mathf.Min(currentHealth + health, MaxHealth()), 0);
+        currentHealth = Mathf.Max(Mathf.Min(currentHealth + adjustment, MaxHealth()), 0);
         UpdateHealthBar();
+
+        if (popupTextPrefab != null)
+        {
+            PopupText.Create(popupTextPrefab, transform.position, adjustment);
+        }
 
         if (currentHealth <= 0)
         {

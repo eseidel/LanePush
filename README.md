@@ -24,6 +24,8 @@ https://docs.unity3d.com/Packages/com.unity.render-pipelines.universal@14.0/manu
 * Death animations
 * Player Death
 * Target highlight on mouse hover.
+* Vision
+* Health Regen
 
  
 # Notes
