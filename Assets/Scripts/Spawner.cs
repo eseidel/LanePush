@@ -4,7 +4,9 @@ using UnityEngine;
 
 public class Spawner : MonoBehaviour
 {
-    public int secondsBetweenSpawns;
+    int secondsBetweenSpawns = 3;
+    int secondsBetweenWaves = 12;
+
     public GameObject meleePrefab;
     public GameObject rangedPrefab;
     public Transform spawnPoint;
@@ -14,7 +16,7 @@ public class Spawner : MonoBehaviour
 
     public Team team;
 
-    bool nextIsMelee = false;
+    int spawnCounter = 0;
 
     void Spawn(GameObject prefab)
     {
@@ -31,14 +33,19 @@ public class Spawner : MonoBehaviour
         if (timeUntilNextSpawn < 0)
         {
             timeUntilNextSpawn = secondsBetweenSpawns;
-            if (nextIsMelee)
+            if ((spawnCounter % 6) < 3)
             {
                 Spawn(meleePrefab);
-            } else
+            }
+            else
             {
                 Spawn(rangedPrefab);
             }
-            nextIsMelee = !nextIsMelee;
+            spawnCounter++;
+            if (spawnCounter % 6 == 0)
+            {
+                timeUntilNextSpawn = secondsBetweenWaves;
+            }
         }
     }
 }

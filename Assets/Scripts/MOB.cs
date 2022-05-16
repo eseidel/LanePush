@@ -8,6 +8,7 @@ using UnityEngine.Assertions;
 class AggroEntry
 {
     public MOB enemy;
+    public float distanceToEnemy;
 
     public bool IsChamp()
     {
@@ -153,6 +154,8 @@ public class MOB : MonoBehaviour
             {
                 var entry = new AggroEntry();
                 entry.enemy = mob;
+                // FIXME: This should be path-distance to.
+                entry.distanceToEnemy = DistanceTo(mob);
                 aggroList.Add(entry);
             }
         }
@@ -162,10 +165,11 @@ public class MOB : MonoBehaviour
             {
                 if (a.IsChamp() != b.IsChamp())
                 {
-                        // Sort minions first.
+                    // Attack minions before champions.
                     return a.IsChamp() ? 1 : -1;
                 }
-                return 0;
+                // Prefer closer targets.
+                return a.distanceToEnemy.CompareTo(b.distanceToEnemy);
             });
             currentTarget = aggroList[0].enemy;
         }

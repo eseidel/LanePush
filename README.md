@@ -1,13 +1,22 @@
 # LanePush
 
-MVP
-* Make it possible for the player to attack.
+## MVP
 * make it possible for the player to respawn.
 * Basic attack Animations
-* Minions re-target / drop aggro
-* Despawn missles after a certain time?
+* Minions should prefer the closest target among equals.
+* Minion call for help?
+
+## Bugs
+* Mellee minions aren't doing damage?
+* Structures can be pushed around.
+* Player can be pushed around.
+* Minions shove through each other instead of pathing around.
+* Some ranged minions just seem to get stuck?
+* Blue minions won't target red tower?
 
 ## TODO
+* Select things with mouse-1?
+* Show minion intent above their heads.
 * Player spawn locations
 * Walls
 * Scaling animations with attack speed.
