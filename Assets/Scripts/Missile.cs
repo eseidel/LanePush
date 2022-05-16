@@ -6,20 +6,20 @@ using UnityEngine;
 public class Missile : MonoBehaviour
 {
     public MOB source;
-    public Transform target;
+    public MOB target;
     public Rigidbody rigidBody;
     float angleChangingSpeed = 100;
     public float movementSpeed;
     float damage = 0;
 
-    public static Missile FireMissile(GameObject prefab, Vector3 spawnPoint, MOB source, Transform target, float damage)
+    public static Missile FireMissile(GameObject prefab, Vector3 spawnPoint, MOB source, MOB target, float damage)
     {
         var obj = Object.Instantiate(prefab, spawnPoint, Quaternion.identity);
         var missile = obj.GetComponent<Missile>();
         missile.target = target;
         missile.damage = damage;
         missile.source = source;
-        obj.transform.LookAt(target);
+        obj.transform.LookAt(target.ModelCenter());
         return missile;
     }
 
@@ -36,7 +36,7 @@ public class Missile : MonoBehaviour
             Destroy(gameObject);
             return;
         }
-        Vector3 direction = target.position - rigidBody.position;
+        Vector3 direction = target.ModelCenter() - rigidBody.position;
         direction.Normalize();
         var rotateAmount = Vector3.Cross(direction, transform.up);
         rigidBody.angularVelocity = -angleChangingSpeed * rotateAmount;

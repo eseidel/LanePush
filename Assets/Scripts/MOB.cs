@@ -113,6 +113,10 @@ public class MOB : MonoBehaviour
     {
         return mobType == MOBType.Champ;
     }
+    public Vector3 ModelCenter()
+    {
+        return transform.position + new Vector3(0, 0.5f, 0);
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -303,7 +307,7 @@ public class MOB : MonoBehaviour
 
     void LaunchMissle()
     {
-        Missile.FireMissile(missilePrefab, missileSpawn.position, this, currentTarget.transform, AttackDamage());
+        Missile.FireMissile(missilePrefab, missileSpawn.position, this, currentTarget, AttackDamage());
     }
 
     void CallForHelp()
