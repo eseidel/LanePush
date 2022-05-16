@@ -20,7 +20,6 @@ public class Spawner : MonoBehaviour
     {
         var obj = Object.Instantiate(prefab, spawnPoint.transform.position, Quaternion.identity);
         var mob = obj.GetComponent<MOB>();
-        mob.isMinion = true;
         mob.team = team;
         mob.waypoints = waypoints;
     }

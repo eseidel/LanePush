@@ -31,7 +31,14 @@ public class PlayerController : MonoBehaviour
             RaycastHit hit;
             if (Physics.Raycast(ray, out hit))
             {
-                me.WalkTo(hit.point);
+                var mob = hit.collider.GetComponentInParent<MOB>();
+                if (mob != null && mob.team != me.team)
+                {
+                    me.AttackTarget(mob);
+                } else
+                {
+                    me.WalkTo(hit.point);
+                }
             }
         }
 

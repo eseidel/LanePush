@@ -2,10 +2,24 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Assertions;
 
-class AggroList
+
+class AggroEntry
 {
+    public MOB enemy;
 
+    public bool IsChamp()
+    {
+        return enemy.mobType == MOBType.Champ;
+    }
+}
+
+public enum MOBType
+{
+    Champ,
+    Minion,
+    Structure,
 }
 
 public enum Team
@@ -51,7 +65,7 @@ public class MOB : MonoBehaviour
 
 
     // FIXME: This belongs on a Minion AI?
-    public bool isMinion = false;
+    public MOBType mobType;
     public Waypoints waypoints;
     Transform currentWaypoint;
     float waypointDistanceThreshold = 1f;
@@ -77,15 +91,30 @@ public class MOB : MonoBehaviour
         return stats.baseMoveSpeed;
     }
 
+    float AttackRange()
+    {
+        return stats.attackRange;
+    }
+
+    bool InAttackRange(MOB mob)
+    {
+        return DistanceTo(mob) <= AttackRange();
+    }
+
+    bool IsMinion()
+    {
+        return mobType == MOBType.Minion;
+    }
+
     // Start is called before the first frame update
     void Start()
     {
         navMeshAgent = GetComponent<NavMeshAgent>();
         mobsMask = LayerMask.GetMask("MOB");
-        AdjustHealth(MaxHealth());
+        AdjustHealth(MaxHealth(), this);
 
         // AddCircle("AcquisitionRange", acquisitionRange);
-        // AddCircle("AttackRange", stats.attackRange);
+        AddCircle("AttackRange", AttackRange());
 
         navMeshAgent.speed = MoveSpeed();
 
@@ -110,26 +139,35 @@ public class MOB : MonoBehaviour
     // Walking -- has no target.
     void UpdateAggroList()
     {
-        ValidateCurrentTarget();
-
-        if (currentTarget == null)
+        List<AggroEntry> aggroList = new List<AggroEntry>();
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, acquisitionRange, mobsMask);
+        foreach (var hitCollider in hitColliders)
         {
-            // Hack to get a nearby mob.
-            Collider[] hitColliders = Physics.OverlapSphere(transform.position, acquisitionRange, mobsMask);
-            foreach (var hitCollider in hitColliders)
+            var mob = hitCollider.gameObject.GetComponent<MOB>();
+            if (mob == null)
             {
-                var mob = hitCollider.gameObject.GetComponent<MOB>();
-                if (mob == null)
-                {
-                    Debug.LogFormat("{0} in MOB layer does not have parent with MOB component", hitCollider);
-                    continue;
-                }
-                if (mob.team != team)
-                {
-                    currentTarget = mob;
-                    break;
-                }
+                Debug.LogFormat("{0} in MOB layer does not have parent with MOB component", hitCollider);
+                continue;
             }
+            if (mob.team != team)
+            {
+                var entry = new AggroEntry();
+                entry.enemy = mob;
+                aggroList.Add(entry);
+            }
+        }
+        if (aggroList.Count > 0)
+        {
+            aggroList.Sort(delegate (AggroEntry a, AggroEntry b)
+            {
+                if (a.IsChamp() != b.IsChamp())
+                {
+                        // Sort minions first.
+                    return a.IsChamp() ? 1 : -1;
+                }
+                return 0;
+            });
+            currentTarget = aggroList[0].enemy;
         }
 
         // Enemy champions attacking an allied champion.
@@ -150,7 +188,7 @@ public class MOB : MonoBehaviour
             {
                 ClearTarget();
             }
-            else if (isMinion && DistanceTo(currentTarget) > acquisitionRange)
+            else if (IsMinion() && DistanceTo(currentTarget) > acquisitionRange)
             {
                 // If target is out of range, drop.
                 ClearTarget();
@@ -167,8 +205,9 @@ public class MOB : MonoBehaviour
         }
     }
 
-    public void AdjustHealth(float health)
+    public void AdjustHealth(float health, MOB source)
     {
+        // Debug.Log("Adjust Health " + health + " for " + this + " from " + source);
         currentHealth = Mathf.Max(Mathf.Min(currentHealth + health, MaxHealth()), 0);
         UpdateHealthBar();
 
@@ -195,6 +234,7 @@ public class MOB : MonoBehaviour
 
     void Chase(MOB mob)
     {
+        Assert.AreNotEqual(mob.team, team);
         currentTarget = mob;
         status = Status.Chasing;
         navMeshAgent.SetDestination(currentTarget.transform.position);
@@ -203,6 +243,20 @@ public class MOB : MonoBehaviour
     void CancelAutoAttack()
     {
 
+    }
+
+    public void AttackTarget(MOB mob)
+    {
+        Assert.AreNotEqual(mob.team, team);
+        currentTarget = mob;
+        if (InAttackRange(mob))
+        {
+            StartAutoAttack();
+        }
+        else
+        {
+            Chase(mob);
+        }
     }
 
     public void WalkTo(Vector3 point)
@@ -228,10 +282,7 @@ public class MOB : MonoBehaviour
 
     void LaunchMissle()
     {
-        var obj = Object.Instantiate(missilePrefab, missileSpawn.position, Quaternion.identity);
-        var missle = obj.GetComponent<Missile>();
-        missle.target = currentTarget!.transform;
-        missle.damage = AttackDamage();
+        Missile.FireMissile(missilePrefab, missileSpawn.position, this, currentTarget.transform, AttackDamage());
     }
 
     void CallForHelp()
@@ -262,13 +313,18 @@ public class MOB : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        timeUntilTargetUpdate -= Time.deltaTime;
-        if (timeUntilTargetUpdate < 0)
-        {
-            timeUntilTargetUpdate = targetUpdateInterval;
-            UpdateAggroList();
+        ValidateCurrentTarget();
 
-            // If in the middle of an action, don't do anything.
+        if (IsMinion())
+        {
+            timeUntilTargetUpdate -= Time.deltaTime;
+            if (timeUntilTargetUpdate < 0)
+            {
+                timeUntilTargetUpdate = targetUpdateInterval;
+                UpdateAggroList();
+
+                // If in the middle of an action, don't do anything.
+            }
         }
 
         if (currentTarget != null)
@@ -282,7 +338,7 @@ public class MOB : MonoBehaviour
             }
             else if (status == Status.Attacking)
             {
-                if (DistanceTo(currentTarget) < stats.attackRange)
+                if (InAttackRange(currentTarget))
                 {
                     timeUntilNextAttack -= Time.deltaTime;
                     if (timeUntilNextAttack <= 0)
@@ -298,25 +354,25 @@ public class MOB : MonoBehaviour
             }
             else if (status == Status.Chasing)
             {
-                if (DistanceTo(currentTarget) < stats.attackRange)
+                if (InAttackRange(currentTarget))
                 {
                     StartAutoAttack();
                 }
                 else
                 {
                     // Update our target location.
-                Chase(currentTarget);
+                    Chase(currentTarget);
                 }
             }
             else if (status == Status.Idle)
             {
-                if (DistanceTo(currentTarget) < stats.attackRange)
+                if (InAttackRange(currentTarget))
                 {
                     StartAutoAttack();
                 }
                 else
                 {
-                    if (isMinion)
+                    if (IsMinion())
                     {
                         // If we have a target start chasing it.
                         Chase(currentTarget);
@@ -324,7 +380,8 @@ public class MOB : MonoBehaviour
                 }
 
             }
-        } else
+        }
+        else
         {
             if (status == Status.Idle)
             {

@@ -157,7 +157,7 @@ MonoBehaviour:
   stats: {fileID: 11400000, guid: 25ce95ab4a6938545857aa543b567210, type: 2}
   missileSpawn: {fileID: 5605827170732590679}
   missilePrefab: {fileID: 4164277237464812670, guid: ae00a66c9bdbf2846b8397858f3d7059, type: 3}
-  isMinion: 1
+  mobType: 1
   waypoints: {fileID: 0}
 --- !u!136 &3625670408801811403
 CapsuleCollider:

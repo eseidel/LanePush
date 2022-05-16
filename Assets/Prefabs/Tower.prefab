@@ -170,9 +170,10 @@ MonoBehaviour:
   team: 0
   healthBar: {fileID: 7990669326916065336}
   stats: {fileID: 11400000, guid: 8937871595981da45a7685f68bdf6c0b, type: 2}
-  isMinion: 0
   missileSpawn: {fileID: 72429862058820785}
   missilePrefab: {fileID: 4164277237464812670, guid: ae00a66c9bdbf2846b8397858f3d7059, type: 3}
+  mobType: 2
+  waypoints: {fileID: 0}
 --- !u!1001 &13827987937716740
 PrefabInstance:
   m_ObjectHideFlags: 0
