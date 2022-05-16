@@ -8,7 +8,7 @@ public class Missile : MonoBehaviour
     public MOB source;
     public Transform target;
     public Rigidbody rigidBody;
-    [SerializeField] float angleChangingSpeed;
+    float angleChangingSpeed = 360;
     public float movementSpeed;
     float damage = 0;
 

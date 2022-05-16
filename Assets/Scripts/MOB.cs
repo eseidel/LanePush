@@ -44,6 +44,7 @@ public class MOB : MonoBehaviour
     NavMeshAgent navMeshAgent;
     public Team team;
     public HealthBar healthBar;
+    public StatusBar statusBar;
     public MOBStats stats;
 
     MOB currentTarget;
@@ -107,6 +108,11 @@ public class MOB : MonoBehaviour
         return mobType == MOBType.Minion;
     }
 
+    bool IsChamp()
+    {
+        return mobType == MOBType.Champ;
+    }
+
     // Start is called before the first frame update
     void Start()
     {
@@ -115,7 +121,12 @@ public class MOB : MonoBehaviour
         AdjustHealth(MaxHealth(), this);
 
         // AddCircle("AcquisitionRange", acquisitionRange);
-        AddCircle("AttackRange", AttackRange());
+        //AddCircle("AttackRange", AttackRange());
+
+        if (statusBar && IsChamp())
+        {
+            statusBar.SetText("Player");
+        }
 
         navMeshAgent.speed = MoveSpeed();
 
@@ -314,9 +325,30 @@ public class MOB : MonoBehaviour
         return false;
     }
 
+    string DebugStatusString()
+    {
+        switch (status)
+        {
+            case Status.Attacking:
+                return "Attacking";
+            case Status.ExplicitWalk:
+                return "Explicit Walk";
+            case Status.Chasing:
+                return "Chasing";
+            case Status.Idle:
+                return "Idle";
+        }
+        return null;
+    }
+
     // Update is called once per frame
     void Update()
     {
+        if (IsMinion() && statusBar != null)
+        {
+            statusBar.SetText(DebugStatusString());
+        }
+
         ValidateCurrentTarget();
 
         if (IsMinion())
