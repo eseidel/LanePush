@@ -33,16 +33,16 @@ public class PopupText : MonoBehaviour
         textMesh.text = positiveInt.ToString();
         if (amount < 0)
         {
-            textMesh.fontSize = 36;
+            textMesh.fontSize = 10;
             textColor = Color.red;
         } else
         {
-            textMesh.fontSize = 24;
+            textMesh.fontSize = 10;
             textColor = Color.green;
         }
         textMesh.color = textColor;
         disappearTimer = DISAPPER_TIMER_MAX;
-        moveVector = new Vector3(1, 1) * 30f;
+        moveVector = new Vector3(1, 1) * 3f;
     }
 
     // Update is called once per frame

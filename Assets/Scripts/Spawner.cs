@@ -37,10 +37,10 @@ public class Spawner : MonoBehaviour
             {
                 Spawn(meleePrefab);
             }
-            //else
-            //{
-            //    Spawn(rangedPrefab);
-            //}
+            else
+            {
+                Spawn(rangedPrefab);
+            }
             spawnCounter++;
             if (spawnCounter % 6 == 0)
             {

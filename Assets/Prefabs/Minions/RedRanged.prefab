@@ -76,6 +76,7 @@ MonoBehaviour:
   stats: {fileID: 11400000, guid: f136028bfaeb4fb41998d501167b260b, type: 2}
   missileSpawn: {fileID: 5605827170732590679}
   missilePrefab: {fileID: 4164277237464812670, guid: ae00a66c9bdbf2846b8397858f3d7059, type: 3}
+  popupTextPrefab: {fileID: 3669520424701416890, guid: 27ec797d704514548987abb1c1ae6626, type: 3}
   mobType: 1
   waypoints: {fileID: 0}
 --- !u!136 &3625670408801811403

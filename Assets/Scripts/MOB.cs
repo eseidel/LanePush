@@ -373,8 +373,11 @@ public class MOB : MonoBehaviour
             }
         }
 
+        // FIXME: You can get stuck Attacking with currentTarget = null.
+        // Need to remove the if (currentTarget != null) block.
         if (currentTarget != null)
         {
+            // FIXME: This does not depend on currentTarget != null.
             if (status == Status.ExplicitWalk)
             {
                 if (ReachedDestination())
@@ -424,7 +427,6 @@ public class MOB : MonoBehaviour
                         Chase(currentTarget);
                     }
                 }
-
             }
         }
         else
