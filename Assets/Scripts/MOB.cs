@@ -16,18 +16,18 @@ using System.Linq;
 
 enum MinionPriority
 {
-    Highest = 0,
-    ChampAttacksChamp = 1,
-    MinionAttacksChamp = 2,
-    MinionAttacksMinion = 3,
-    TurretAttacksMinion = 4,
+    Highest = 10,
+    ChampAttacksChamp = 9,
+    MinionAttacksChamp = 8,
+    MinionAttacksMinion = 7,
+    TurretAttacksMinion = 6,
     ChampAttacksMinion = 5,
-    NearbyMinion = 6,
-    NearbyChampion = 7,
-    NearbyTurret = 8, // Unclear what order this is in.
-    NearbyInhib = 9, // Unclear what order this is in.
-    NearbyNexus = 10, // Unclear what order this is in.
-    Lowest,
+    NearbyMinion = 4,
+    NearbyChampion = 3,
+    NearbyTurret = 2, // Unclear what order this is in.
+    NearbyInhib = 1, // Unclear what order this is in.
+    NearbyNexus = 0, // Unclear what order this is in.
+    Lowest = -1,
 }
 
 public enum MOBType
@@ -204,10 +204,13 @@ public class MOB : MonoBehaviour
             case MOBType.Minion:
                 return MinionPriority.NearbyMinion;
             case MOBType.Champ:
-                return MinionPriority.NearbyMinion;
+                return MinionPriority.NearbyChampion;
             case MOBType.Turret:
                 return MinionPriority.NearbyTurret;
-                // Need inhib here?
+            case MOBType.Inhibitor:
+                return MinionPriority.NearbyInhib;
+            case MOBType.Nexus:
+                return MinionPriority.NearbyNexus;
         }
         // Assert not reached?
         return MinionPriority.Lowest;
@@ -217,7 +220,7 @@ public class MOB : MonoBehaviour
     // Fighting -- has a target, in range.
     // Chasing -- has a target, not in range.
     // Walking -- has no target.
-    MOB FindNearbyAttackTarget()
+    MOB FindBestTargetInAcquisitionRange()
     {
         var mobs = NearbyMobs(acquisitionRange).Where(mob => mob.team != team).ToList();
         if (mobs.Count > 0)
@@ -228,7 +231,7 @@ public class MOB : MonoBehaviour
                 var bPrio = AggroPriorityByMobType(b.mobType);
                 if (aPrio != bPrio)
                 {
-                    return aPrio.CompareTo(bPrio);
+                    return -aPrio.CompareTo(bPrio);
                 }
                 // Prefer closer targets.
                 return DistanceTo(a).CompareTo(DistanceTo(b));
@@ -273,13 +276,12 @@ public class MOB : MonoBehaviour
 
     public void TakeDamage(float damage, MOB source)
     {
-        // Send for help
-        var mobs = NearbyMobs(callForHelpRange).Where(mob => mob.team == team).ToList();
-        foreach (var mob in mobs)
-        {
-            mob.OnCallForHelp(this, source);
-        }
         AdjustHealth(-damage, source);
+        // FIXME: Should it still call for help even if dead?
+        if (isAlive)
+        {
+            CallForHelp(source);
+        }
     }
 
     public void AdjustHealth(float adjustment, MOB source)
@@ -295,6 +297,7 @@ public class MOB : MonoBehaviour
 
         if (currentHealth <= 0)
         {
+            isAlive = false;
             Destroy(gameObject);
         }
     }
@@ -364,9 +367,14 @@ public class MOB : MonoBehaviour
         Missile.FireMissile(missilePrefab, missileSpawn.position, this, GetTarget(), AttackDamage());
     }
 
-    void CallForHelp()
+    void CallForHelp(MOB source)
     {
         // Find all nearby minions and call for help to them.
+        var mobs = NearbyMobs(callForHelpRange).Where(mob => mob.team == team).ToList();
+        foreach (var mob in mobs)
+        {
+            mob.OnCallForHelp(this, source);
+        }
     }
 
     MinionPriority PriorityFromCallForHelp(MOBType attackerType, MOBType targetType)
@@ -392,7 +400,7 @@ public class MOB : MonoBehaviour
         {
             return MinionPriority.TurretAttacksMinion;
         }
-        else if (matches(MOBType.Champ, MOBType.Champ))
+        else if (matches(MOBType.Champ, MOBType.Minion))
         {
             return MinionPriority.ChampAttacksMinion;
         }
@@ -453,12 +461,17 @@ public class MOB : MonoBehaviour
         if (timeUntilTargetUpdate < 0)
         {
             timeUntilTargetUpdate = targetUpdateInterval;
-            var target = FindNearbyAttackTarget();
-            if (target != null)
-            {
-                UpdateMinionAttackTarget(target, AggroPriorityByMobType(target.mobType));
-            }
+            FindNewNearbyTarget();
             // FIXME: If in the middle of an action, don't do anything.
+        }
+    }
+
+    void FindNewNearbyTarget()
+    {
+        var target = FindBestTargetInAcquisitionRange();
+        if (target != null)
+        {
+            UpdateMinionAttackTarget(target, AggroPriorityByMobType(target.mobType));
         }
     }
 
@@ -481,6 +494,10 @@ public class MOB : MonoBehaviour
         if (IsMinion())
         {
             MinionBehaviorSweep();
+        }
+        if (IsChamp() && !HaveTarget())
+        {
+            FindNewNearbyTarget();
         }
 
         if (status == Status.ExplicitWalk)
@@ -550,6 +567,11 @@ public class MOB : MonoBehaviour
                     if (Vector3.Distance(transform.position, currentWaypoint.position) < waypointDistanceThreshold)
                     {
                         currentWaypoint = waypoints.GetNextWaypoint(currentWaypoint, team == Team.red);
+                        // Mark that we're done with waypoints (so we don't loop).
+                        if (currentWaypoint == null)
+                        {
+                            waypoints = null;
+                        }
                     }
                     if (currentWaypoint)
                     {

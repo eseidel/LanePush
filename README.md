@@ -1,16 +1,16 @@
 # LanePush
 
 ## MVP
-* make it possible for the player to respawn.
+* Make it possible for the player to respawn.
 * Basic attack Animations
-* Minions should prefer the closest target among equals.
-* Minion call for help?
 * Give gold on minion kills (and display it).
 
 ## Bugs
-* Structures can be pushed around.
+* Calling for help is not working.
+* Structures can be pushed around (remove navmeshagent).
 * Player can be pushed around.
 * Minions shove through each other instead of pathing around.
+* Minions slow down when approaching each other?
 * Blue minions won't target red tower?
 * Blue Minions will go back to first waypoint instead of attacking tower?
 
