@@ -50,16 +50,17 @@ public class MOB : MonoBehaviour
     MOB currentTarget;
     Status status = Status.Idle;
 
+    // FIXME: Should health be on a separate object?
     float currentHealth;
+    bool isAlive = true;
 
-    // Should all mobs should update at the same time?
+    // All mobs should update at the same time based on server tick.
     float targetUpdateInterval = 0.25f;
     float timeUntilTargetUpdate = 0;
 
     float acquisitionRange = 7.0f;
     float timeUntilNextAttack = 0;
 
-    bool isAlive = true;
     LayerMask mobsMask;
 
     public Transform missileSpawn;
@@ -373,35 +374,32 @@ public class MOB : MonoBehaviour
             }
         }
 
-        // FIXME: You can get stuck Attacking with currentTarget = null.
-        // Need to remove the if (currentTarget != null) block.
-        if (currentTarget != null)
+        if (status == Status.ExplicitWalk)
         {
-            // FIXME: This does not depend on currentTarget != null.
-            if (status == Status.ExplicitWalk)
+            if (ReachedDestination())
             {
-                if (ReachedDestination())
+                status = Status.Idle;
+            }
+        }
+        else if (status == Status.Attacking)
+        {
+            if (currentTarget != null && InAttackRange(currentTarget))
+            {
+                timeUntilNextAttack -= Time.deltaTime;
+                if (timeUntilNextAttack <= 0)
                 {
-                    status = Status.Idle;
+                    LaunchMissle();
+                    StartAutoAttack();
                 }
             }
-            else if (status == Status.Attacking)
+            else
             {
-                if (InAttackRange(currentTarget))
-                {
-                    timeUntilNextAttack -= Time.deltaTime;
-                    if (timeUntilNextAttack <= 0)
-                    {
-                        LaunchMissle();
-                        StartAutoAttack();
-                    }
-                }
-                else
-                {
-                    status = Status.Idle;
-                }
+                status = Status.Idle;
             }
-            else if (status == Status.Chasing)
+        }
+        else if (status == Status.Chasing)
+        {
+            if (currentTarget != null)
             {
                 if (InAttackRange(currentTarget))
                 {
@@ -413,7 +411,14 @@ public class MOB : MonoBehaviour
                     Chase(currentTarget);
                 }
             }
-            else if (status == Status.Idle)
+            else
+            {
+                status = Status.Idle;
+            }
+        }
+        else if (status == Status.Idle)
+        {
+            if (currentTarget != null)
             {
                 if (InAttackRange(currentTarget))
                 {
@@ -428,10 +433,7 @@ public class MOB : MonoBehaviour
                     }
                 }
             }
-        }
-        else
-        {
-            if (status == Status.Idle)
+            else
             {
                 if (waypoints != null)
                 {
@@ -446,6 +448,8 @@ public class MOB : MonoBehaviour
                     }
                 }
             }
+
         }
+
     }
 }

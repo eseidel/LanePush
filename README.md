@@ -5,18 +5,17 @@
 * Basic attack Animations
 * Minions should prefer the closest target among equals.
 * Minion call for help?
+* Give gold on minion kills (and display it).
 
 ## Bugs
 * Structures can be pushed around.
 * Player can be pushed around.
 * Minions shove through each other instead of pathing around.
-* Some ranged minions just seem to get stuck?
 * Blue minions won't target red tower?
+* Blue Minions will go back to first waypoint instead of attacking tower?
 
 ## TODO
 * Select things with mouse-1?
-* Camera stacking to show UI above other objects?
-https://docs.unity3d.com/Packages/com.unity.render-pipelines.universal@14.0/manual/camera-stacking.html
 * Player spawn locations
 * Walls
 * Scaling animations with attack speed.
@@ -26,6 +25,7 @@ https://docs.unity3d.com/Packages/com.unity.render-pipelines.universal@14.0/manu
 * Target highlight on mouse hover.
 * Vision
 * Health Regen
+* Add Enemy champion with AI
 
  
 # Notes

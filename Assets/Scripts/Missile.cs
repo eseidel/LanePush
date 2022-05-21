@@ -45,11 +45,11 @@ public class Missile : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject == target.gameObject)
+        if (target != null && other.gameObject == target.gameObject)
         {
             var mob = other.GetComponent<MOB>();
-                mob.AdjustHealth(-damage, source);
-                Destroy(gameObject);
+            mob.AdjustHealth(-damage, source);
+            Destroy(gameObject);
         }
         // Otherwise we ran into another missle or the ground, etc.
         // FIXME: Is there a way to only collide with certain layers?
