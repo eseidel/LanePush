@@ -3,24 +3,40 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Assertions;
+using System.Linq;
 
 
-class AggroEntry
+// Enemy champions attacking an allied champion.
+// Enemy minions attacking an allied champion.
+// Enemy minions attacking an allied minion.
+// Enemy turrets attacking an allied minion.
+// Enemy champions attacking an allied minion.
+// The closest enemy minion.
+// The closest enemy champion.
+
+enum MinionPriority
 {
-    public MOB enemy;
-    public float distanceToEnemy;
-
-    public bool IsChamp()
-    {
-        return enemy.mobType == MOBType.Champ;
-    }
+    Highest = 0,
+    ChampAttacksChamp = 1,
+    MinionAttacksChamp = 2,
+    MinionAttacksMinion = 3,
+    TurretAttacksMinion = 4,
+    ChampAttacksMinion = 5,
+    NearbyMinion = 6,
+    NearbyChampion = 7,
+    NearbyTurret = 8, // Unclear what order this is in.
+    NearbyInhib = 9, // Unclear what order this is in.
+    NearbyNexus = 10, // Unclear what order this is in.
+    Lowest,
 }
 
 public enum MOBType
 {
     Champ,
     Minion,
-    Structure,
+    Turret,
+    Inhibitor,
+    Nexus,
 }
 
 public enum Team
@@ -38,6 +54,18 @@ enum Status
     Attacking,
 }
 
+class AttackTarget
+{
+    public MOB target;
+    public MinionPriority priority;
+
+    public AttackTarget(MOB target, MinionPriority priority)
+    {
+        this.target = target;
+        this.priority = priority;
+    }
+}
+
 [RequireComponent(typeof(NavMeshAgent))]
 public class MOB : MonoBehaviour
 {
@@ -47,7 +75,7 @@ public class MOB : MonoBehaviour
     public StatusBar statusBar;
     public MOBStats stats;
 
-    MOB currentTarget;
+    AttackTarget target;
     Status status = Status.Idle;
 
     // FIXME: Should health be on a separate object?
@@ -59,6 +87,7 @@ public class MOB : MonoBehaviour
     float timeUntilTargetUpdate = 0;
 
     float acquisitionRange = 7.0f;
+    float callForHelpRange = 7.0f; // No clue what this should be?
     float timeUntilNextAttack = 0;
 
     LayerMask mobsMask;
@@ -151,14 +180,10 @@ public class MOB : MonoBehaviour
         attackCircle.transform.localPosition = Vector3.zero;
     }
 
-    // Minion States
-    // Fighting -- has a target, in range.
-    // Chasing -- has a target, not in range.
-    // Walking -- has no target.
-    void UpdateAggroList()
+    List<MOB> NearbyMobs(float range)
     {
-        List<AggroEntry> aggroList = new List<AggroEntry>();
-        Collider[] hitColliders = Physics.OverlapSphere(transform.position, acquisitionRange, mobsMask);
+        List<MOB> mobs = new List<MOB>();
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, range, mobsMask);
         foreach (var hitCollider in hitColliders)
         {
             var mob = hitCollider.gameObject.GetComponent<MOB>();
@@ -167,56 +192,76 @@ public class MOB : MonoBehaviour
                 Debug.LogFormat("{0} in MOB layer does not have parent with MOB component", hitCollider);
                 continue;
             }
-            if (mob.team != team)
-            {
-                var entry = new AggroEntry();
-                entry.enemy = mob;
-                // FIXME: This should be path-distance to.
-                entry.distanceToEnemy = DistanceTo(mob);
-                aggroList.Add(entry);
-            }
+            mobs.Add(mob);
         }
-        if (aggroList.Count > 0)
+        return mobs;
+    }
+
+    MinionPriority AggroPriorityByMobType(MOBType type)
+    {
+        switch (type)
         {
-            aggroList.Sort(delegate (AggroEntry a, AggroEntry b)
+            case MOBType.Minion:
+                return MinionPriority.NearbyMinion;
+            case MOBType.Champ:
+                return MinionPriority.NearbyMinion;
+            case MOBType.Turret:
+                return MinionPriority.NearbyTurret;
+                // Need inhib here?
+        }
+        // Assert not reached?
+        return MinionPriority.Lowest;
+    }
+
+    // Minion States
+    // Fighting -- has a target, in range.
+    // Chasing -- has a target, not in range.
+    // Walking -- has no target.
+    MOB FindNearbyAttackTarget()
+    {
+        var mobs = NearbyMobs(acquisitionRange).Where(mob => mob.team != team).ToList();
+        if (mobs.Count > 0)
+        {
+            mobs.Sort(delegate (MOB a, MOB b)
             {
-                if (a.IsChamp() != b.IsChamp())
+                var aPrio = AggroPriorityByMobType(a.mobType);
+                var bPrio = AggroPriorityByMobType(b.mobType);
+                if (aPrio != bPrio)
                 {
-                    // Attack minions before champions.
-                    return a.IsChamp() ? 1 : -1;
+                    return aPrio.CompareTo(bPrio);
                 }
                 // Prefer closer targets.
-                return a.distanceToEnemy.CompareTo(b.distanceToEnemy);
+                return DistanceTo(a).CompareTo(DistanceTo(b));
             });
-            currentTarget = aggroList[0].enemy;
+            return mobs[0];
         }
-
-        // Enemy champions attacking an allied champion.
-        // Enemy minions attacking an allied champion.
-        // Enemy minions attacking an allied minion.
-        // Enemy turrets attacking an allied minion.
-        // Enemy champions attacking an allied minion.
-        // The closest enemy minion.
-        // The closest enemy champion.
+        return null;
     }
 
-    void ValidateCurrentTarget()
+    bool HaveTarget()
     {
-        if (currentTarget != null)
-        {
-            // If target is untargable, drop.
-            if (!currentTarget.IsTargetable())
-            {
-                ClearTarget();
-            }
-            else if (IsMinion() && DistanceTo(currentTarget) > acquisitionRange)
-            {
-                // If target is out of range, drop.
-                ClearTarget();
-            }
-        }
+        return GetTarget() != null;
     }
 
+    MOB GetTarget()
+    {
+        if (target != null)
+        {
+            if (!target.target.IsTargetable())
+            {
+                ClearTarget();
+                return null;
+            }
+            // If target is out of range, drop.
+            if (IsMinion() && DistanceTo(target.target) > acquisitionRange)
+            {
+                ClearTarget();
+                return null;
+            }
+            return target.target;
+        }
+        return null;
+    }
     void UpdateHealthBar()
     {
         if (healthBar != null)
@@ -224,6 +269,17 @@ public class MOB : MonoBehaviour
             healthBar.SetMaxHealth(MaxHealth());
             healthBar.SetCurrentHealth(currentHealth);
         }
+    }
+
+    public void TakeDamage(float damage, MOB source)
+    {
+        // Send for help
+        var mobs = NearbyMobs(callForHelpRange).Where(mob => mob.team == team).ToList();
+        foreach (var mob in mobs)
+        {
+            mob.OnCallForHelp(this, source);
+        }
+        AdjustHealth(-damage, source);
     }
 
     public void AdjustHealth(float adjustment, MOB source)
@@ -245,7 +301,7 @@ public class MOB : MonoBehaviour
 
     public void ClearTarget()
     {
-        currentTarget = null;
+        target = null;
     }
 
     public bool IsTargetable()
@@ -258,12 +314,10 @@ public class MOB : MonoBehaviour
         return (mob.transform.position - transform.position).magnitude;
     }
 
-    void Chase(MOB mob)
+    void ChaseCurrentTarget()
     {
-        Assert.AreNotEqual(mob.team, team);
-        currentTarget = mob;
         status = Status.Chasing;
-        navMeshAgent.SetDestination(currentTarget.transform.position);
+        navMeshAgent.SetDestination(GetTarget().transform.position);
     }
 
     void CancelAutoAttack()
@@ -271,17 +325,16 @@ public class MOB : MonoBehaviour
 
     }
 
-    public void AttackTarget(MOB mob)
+    public void SetPlayerTarget(MOB mob)
     {
-        Assert.AreNotEqual(mob.team, team);
-        currentTarget = mob;
-        if (InAttackRange(mob))
+        target = new AttackTarget(mob, MinionPriority.Highest);
+        if (InAttackRange(GetTarget()))
         {
             StartAutoAttack();
         }
         else
         {
-            Chase(mob);
+            ChaseCurrentTarget();
         }
     }
 
@@ -308,7 +361,7 @@ public class MOB : MonoBehaviour
 
     void LaunchMissle()
     {
-        Missile.FireMissile(missilePrefab, missileSpawn.position, this, currentTarget, AttackDamage());
+        Missile.FireMissile(missilePrefab, missileSpawn.position, this, GetTarget(), AttackDamage());
     }
 
     void CallForHelp()
@@ -316,9 +369,43 @@ public class MOB : MonoBehaviour
         // Find all nearby minions and call for help to them.
     }
 
-    void OnCallForHelp(MOB caller, MOB attacker)
+    MinionPriority PriorityFromCallForHelp(MOBType attackerType, MOBType targetType)
     {
-        // Add attacker to aggro list.
+        bool matches(MOBType expectedAttacker, MOBType expectedTarget)
+        {
+            return expectedAttacker == attackerType && expectedTarget == targetType;
+        }
+
+        if (matches(MOBType.Champ, MOBType.Champ))
+        {
+            return MinionPriority.ChampAttacksChamp;
+        }
+        else if (matches(MOBType.Minion, MOBType.Champ))
+        {
+            return MinionPriority.MinionAttacksChamp;
+        }
+        else if (matches(MOBType.Minion, MOBType.Minion))
+        {
+            return MinionPriority.MinionAttacksMinion;
+        }
+        else if (matches(MOBType.Turret, MOBType.Minion))
+        {
+            return MinionPriority.TurretAttacksMinion;
+        }
+        else if (matches(MOBType.Champ, MOBType.Champ))
+        {
+            return MinionPriority.ChampAttacksMinion;
+        }
+        // Assert not reached?
+        return MinionPriority.Lowest;
+    }
+
+    void OnCallForHelp(MOB victim, MOB attacker)
+    {
+        if (DistanceTo(attacker) <= acquisitionRange)
+        {
+            UpdateMinionAttackTarget(attacker, PriorityFromCallForHelp(attacker.mobType, victim.mobType));
+        }
     }
 
     bool ReachedDestination()
@@ -352,6 +439,37 @@ public class MOB : MonoBehaviour
         return null;
     }
 
+    void MinionBehaviorSweep()
+    {
+        //Follow any current specialized behavior rules, such as from CC(Taunts, Flees, Fears)
+        //Continue attacking(or moving towards) their current target if that target is still valid.
+        //If they have failed to attack their target for 4 seconds, they temporarily ignore them instead.
+        //Find a new valid target in the minion’s acquisition range to attack.
+        //If multiple valid targets, prioritize based on “how hard is it for me to path there ?”
+        //Check if near a target waypoint, if so change the target waypoint to the next in the line.
+        //Walk towards the target waypoint.If a minion can’t follow any of these behaviors, it will do nothing.Minions have a lot of checks to note whether or not a target is valid or not.There’s obvious ones like “which team is the target on” but also non - obvious ones like “where on the map is my target”. Many of these will be covered further down.
+
+        timeUntilTargetUpdate -= Time.deltaTime;
+        if (timeUntilTargetUpdate < 0)
+        {
+            timeUntilTargetUpdate = targetUpdateInterval;
+            var target = FindNearbyAttackTarget();
+            if (target != null)
+            {
+                UpdateMinionAttackTarget(target, AggroPriorityByMobType(target.mobType));
+            }
+            // FIXME: If in the middle of an action, don't do anything.
+        }
+    }
+
+    void UpdateMinionAttackTarget(MOB mob, MinionPriority priority)
+    {
+        if (target == null || target.priority < priority)
+        {
+            target = new AttackTarget(mob, priority);
+        }
+    }
+
     // Update is called once per frame
     void Update()
     {
@@ -360,18 +478,9 @@ public class MOB : MonoBehaviour
             statusBar.SetText(DebugStatusString());
         }
 
-        ValidateCurrentTarget();
-
         if (IsMinion())
         {
-            timeUntilTargetUpdate -= Time.deltaTime;
-            if (timeUntilTargetUpdate < 0)
-            {
-                timeUntilTargetUpdate = targetUpdateInterval;
-                UpdateAggroList();
-
-                // If in the middle of an action, don't do anything.
-            }
+            MinionBehaviorSweep();
         }
 
         if (status == Status.ExplicitWalk)
@@ -383,7 +492,7 @@ public class MOB : MonoBehaviour
         }
         else if (status == Status.Attacking)
         {
-            if (currentTarget != null && InAttackRange(currentTarget))
+            if (HaveTarget() && InAttackRange(GetTarget()))
             {
                 timeUntilNextAttack -= Time.deltaTime;
                 if (timeUntilNextAttack <= 0)
@@ -399,16 +508,16 @@ public class MOB : MonoBehaviour
         }
         else if (status == Status.Chasing)
         {
-            if (currentTarget != null)
+            if (HaveTarget())
             {
-                if (InAttackRange(currentTarget))
+                if (InAttackRange(GetTarget()))
                 {
                     StartAutoAttack();
                 }
                 else
                 {
                     // Update our target location.
-                    Chase(currentTarget);
+                    ChaseCurrentTarget();
                 }
             }
             else
@@ -418,9 +527,9 @@ public class MOB : MonoBehaviour
         }
         else if (status == Status.Idle)
         {
-            if (currentTarget != null)
+            if (HaveTarget())
             {
-                if (InAttackRange(currentTarget))
+                if (InAttackRange(GetTarget()))
                 {
                     StartAutoAttack();
                 }
@@ -429,7 +538,7 @@ public class MOB : MonoBehaviour
                     if (IsMinion())
                     {
                         // If we have a target start chasing it.
-                        Chase(currentTarget);
+                        ChaseCurrentTarget();
                     }
                 }
             }

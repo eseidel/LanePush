@@ -34,8 +34,9 @@ public class PlayerController : MonoBehaviour
                 var mob = hit.collider.GetComponentInParent<MOB>();
                 if (mob != null && mob.team != me.team)
                 {
-                    me.AttackTarget(mob);
-                } else
+                    me.SetPlayerTarget(mob);
+                }
+                else
                 {
                     me.WalkTo(hit.point);
                 }
