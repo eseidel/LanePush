@@ -233,7 +233,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6267706171553937075, guid: b82699d87b811c04ebe1c363854d9cff, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 2.606
+      value: 3.249
       objectReference: {fileID: 0}
     - target: {fileID: 6267706171553937075, guid: b82699d87b811c04ebe1c363854d9cff, type: 3}
       propertyPath: m_LocalPosition.z
@@ -348,6 +348,18 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4057990725809635589, guid: a917cdd1dc97ec2469a70db44aeb64c4, type: 3}
+      propertyPath: m_Color.b
+      value: 0.26666668
+      objectReference: {fileID: 0}
+    - target: {fileID: 4057990725809635589, guid: a917cdd1dc97ec2469a70db44aeb64c4, type: 3}
+      propertyPath: m_Color.g
+      value: 0.2509804
+      objectReference: {fileID: 0}
+    - target: {fileID: 4057990725809635589, guid: a917cdd1dc97ec2469a70db44aeb64c4, type: 3}
+      propertyPath: m_Color.r
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4538940783377112264, guid: a917cdd1dc97ec2469a70db44aeb64c4, type: 3}
       propertyPath: m_Name
       value: HealthBar
@@ -374,7 +386,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6267706171553937075, guid: a917cdd1dc97ec2469a70db44aeb64c4, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.25
+      value: 1.745
       objectReference: {fileID: 0}
     - target: {fileID: 6267706171553937075, guid: a917cdd1dc97ec2469a70db44aeb64c4, type: 3}
       propertyPath: m_LocalPosition.z

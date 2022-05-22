@@ -1415,6 +1415,11 @@ Transform:
   m_Father: {fileID: 409914526}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1472671633 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7943055472804488549, guid: a5e898feb7000c34aaae11480d7dbe8c, type: 3}
+  m_PrefabInstance: {fileID: 8630531813876908393}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1492597755
 GameObject:
   m_ObjectHideFlags: 0
@@ -2544,6 +2549,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5739151165064579269, guid: a5e898feb7000c34aaae11480d7dbe8c, type: 3}
+      propertyPath: graphics
+      value: 
+      objectReference: {fileID: 1472671633}
     - target: {fileID: 8710251598151661395, guid: a5e898feb7000c34aaae11480d7dbe8c, type: 3}
       propertyPath: m_Name
       value: TargetDummy

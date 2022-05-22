@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 1881316886237124950}
   - component: {fileID: 1395114500612606228}
   m_Layer: 0
-  m_Name: Capsule
+  m_Name: Graphics
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -156,6 +156,9 @@ MonoBehaviour:
   healthBar: {fileID: 0}
   statusBar: {fileID: 0}
   stats: {fileID: 11400000, guid: 39e265b31dcd15e49bf310f227939372, type: 2}
+  graphics: {fileID: 7943055472804488549}
+  fountain: {fileID: 0}
+  isLocalPlayer: 0
   missileSpawn: {fileID: 0}
   missilePrefab: {fileID: 0}
   popupTextPrefab: {fileID: 3669520424701416890, guid: 27ec797d704514548987abb1c1ae6626, type: 3}

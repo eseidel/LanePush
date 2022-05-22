@@ -189,6 +189,10 @@ public class MOB : MonoBehaviour
         {
             statusBar.SetText("Player");
         }
+        else
+        {
+            statusBar.gameObject.SetActive(false);
+        }
 
         navMeshAgent.speed = MoveSpeed();
 
@@ -397,7 +401,10 @@ public class MOB : MonoBehaviour
 
     public void ClearNavigationPath()
     {
-        navMeshAgent.ResetPath();
+        if (navMeshAgent.hasPath)
+        {
+            navMeshAgent.ResetPath();
+        }
     }
 
     void StartAutoAttack()
