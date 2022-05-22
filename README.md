@@ -2,8 +2,8 @@
 
 ## MVP
 * Give cs on minion kills (and display it).
-* Make it possible for the player to respawn.
 * Basic attack Animations
+* Make it possible to win (and restart?)
 
 ## Bugs
 * Calling for help is not working.
@@ -19,13 +19,11 @@
 * Player spawn locations
 * Abilities
 * Buffs
-* Gold
 * Items
 * Walls
 * Scaling animations with attack speed.
 * Experiance / Levels
 * Death animations
-* Player Death
 * Target highlight on mouse hover.
 * Vision
 * Health Regen
