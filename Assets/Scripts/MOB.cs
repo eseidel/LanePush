@@ -75,12 +75,19 @@ public class MOB : MonoBehaviour
     public StatusBar statusBar;
     public MOBStats stats;
 
+    public GameObject graphics;
+    public Transform fountain;
+
+    List<IMOBListener> scripts;
+
     AttackTarget target;
     Status status = Status.Idle;
 
     // FIXME: Should health be on a separate object?
     float currentHealth;
-    bool isAlive = true;
+    public bool isAlive { get; private set; } = true;
+    public bool isLocalPlayer = false;
+    public float deathTimer { get; private set; }
 
     // All mobs should update at the same time based on server tick.
     float targetUpdateInterval = 0.25f;
@@ -103,6 +110,22 @@ public class MOB : MonoBehaviour
     Transform currentWaypoint;
     float waypointDistanceThreshold = 1f;
 
+    // Maybe belongs on a player object?
+    public int Gold { get; private set; }
+
+    void AddGold(int value)
+    {
+        Gold += value;
+    }
+
+    public int GetDeathGoldValue()
+    {
+        return 20;
+    }
+    int GetDeathTimer()
+    {
+        return 5;
+    }
 
     float MaxHealth()
     {
@@ -143,6 +166,11 @@ public class MOB : MonoBehaviour
     {
         return mobType == MOBType.Champ;
     }
+
+    bool isNPC()
+    {
+        return !IsChamp();
+    }
     public Vector3 ModelCenter()
     {
         return transform.position + new Vector3(0, 0.5f, 0);
@@ -153,7 +181,6 @@ public class MOB : MonoBehaviour
     {
         navMeshAgent = GetComponent<NavMeshAgent>();
         mobsMask = LayerMask.GetMask("MOB");
-        AdjustHealth(MaxHealth(), this);
 
         // AddCircle("AcquisitionRange", acquisitionRange);
         //AddCircle("AttackRange", AttackRange());
@@ -165,11 +192,7 @@ public class MOB : MonoBehaviour
 
         navMeshAgent.speed = MoveSpeed();
 
-        // 
-        if (waypoints != null)
-        {
-            currentWaypoint = waypoints.GetFirstWaypoint(team == Team.red);
-        }
+        OnSpawn();
     }
 
     void AddCircle(string name, float radius)
@@ -298,6 +321,24 @@ public class MOB : MonoBehaviour
         if (currentHealth <= 0)
         {
             isAlive = false;
+            // Distribute gold from death.
+            // FIXME: Need to track assists.
+            source.AddGold(GetDeathGoldValue());
+            OnDeath();
+        }
+    }
+
+    void OnDeath()
+    {
+        ClearNavigationPath();
+        // animate out?
+        if (IsChamp())
+        {
+            deathTimer = GetDeathTimer();
+            graphics.SetActive(false);
+        }
+        else
+        {
             Destroy(gameObject);
         }
     }
@@ -339,6 +380,12 @@ public class MOB : MonoBehaviour
         {
             ChaseCurrentTarget();
         }
+    }
+
+    public void BlinkTo(Vector3 point)
+    {
+        ClearNavigationPath();
+        transform.position = point;
     }
 
     public void WalkTo(Vector3 point)
@@ -483,10 +530,38 @@ public class MOB : MonoBehaviour
         }
     }
 
+    void OnSpawn()
+    {
+        isAlive = true;
+        // Find the spawn point for this team.  Teleport there.  Heal.
+        if (IsChamp())
+        {
+            BlinkTo(fountain.position);
+        }
+        graphics.SetActive(true);
+        AdjustHealth(MaxHealth(), this);
+
+        // Minions only.
+        if (waypoints != null)
+        {
+            currentWaypoint = waypoints.GetFirstWaypoint(team == Team.red);
+        }
+    }
+
     // Update is called once per frame
     void Update()
     {
-        if (IsMinion() && statusBar != null)
+        if (!isAlive)
+        {
+            deathTimer -= Time.deltaTime;
+            if (deathTimer < 0)
+            {
+                OnSpawn();
+            }
+            return;
+        }
+
+        if (isNPC() && statusBar != null)
         {
             statusBar.SetText(DebugStatusString());
         }
@@ -495,7 +570,7 @@ public class MOB : MonoBehaviour
         {
             MinionBehaviorSweep();
         }
-        if (IsChamp() && !HaveTarget())
+        else if (!HaveTarget())
         {
             FindNewNearbyTarget();
         }

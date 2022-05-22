@@ -14,17 +14,16 @@ public class PlayerController : MonoBehaviour
     private void Start()
     {
         me = GetComponent<MOB>();
+        me.isLocalPlayer = true;
         navMeshAgent = GetComponent<NavMeshAgent>();
-    }
-
-    void BlinkTo(Vector3 point)
-    {
-        me.ClearNavigationPath();
-        transform.position = point;
     }
 
     void Update()
     {
+        if (!me.isAlive)
+        {
+            return;
+        }
         if (Input.GetMouseButtonDown(1))
         {
             Ray ray = camera.ScreenPointToRay(Input.mousePosition);
@@ -49,7 +48,7 @@ public class PlayerController : MonoBehaviour
             RaycastHit hit;
             if (Physics.Raycast(ray, out hit))
             {
-                BlinkTo(hit.point);
+                me.BlinkTo(hit.point);
             }
         }
     }

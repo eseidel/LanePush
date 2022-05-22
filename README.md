@@ -1,9 +1,9 @@
 # LanePush
 
 ## MVP
+* Give cs on minion kills (and display it).
 * Make it possible for the player to respawn.
 * Basic attack Animations
-* Give gold on minion kills (and display it).
 
 ## Bugs
 * Calling for help is not working.
@@ -17,6 +17,10 @@
 ## TODO
 * Select things with mouse-1?
 * Player spawn locations
+* Abilities
+* Buffs
+* Gold
+* Items
 * Walls
 * Scaling animations with attack speed.
 * Experiance / Levels
